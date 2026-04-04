@@ -1,7 +1,6 @@
 #include <motors.h>
 #include <ble.h>
-#include <calibration.h>
-#include <commands.h>
+#include <CommandHandler.h>
 #include <BLEDevice.h> // zakladni inicializace BLE cipu
 #include <BLEServer.h> // esp32 jako BLE server ke kteremu se pripojuji ostatni
 #include <BLEUtils.h> // pomocne funkce 
@@ -33,7 +32,7 @@ class PrijataDataCallback : public BLECharacteristicCallbacks {
     String cmd = c->getValue().c_str();
     Serial.println("Prijato: " + cmd);
 
-    String result = commands.handle(cmd);
+    String result = Commands.handle(cmd);
 
     Serial.println("Result: " + result);
 

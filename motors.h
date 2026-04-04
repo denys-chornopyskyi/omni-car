@@ -11,11 +11,32 @@
 #define DRIVER1_ON  4  // Enable чип 1 (моторы A+B)
 #define DRIVER2_ON 13  // Enable чип 2 (моторы C+D)
 
+extern int baseSpeed;
+
+extern float kA;
+extern float kB;
+extern float kC;
+extern float kD;
+
 void motorsInit();
 void motorA(int speed);
 void motorB(int speed);
 void motorC(int speed);
 void motorD(int speed);
+
 void stopAll();
 void forward();
 void backward();
+void left();
+void right();
+
+void forwardRight();
+void forwardLeft();
+void backwardRight();
+void backwardLeft();
+
+void turningRight();
+void turningLeft();
+void curvedTrajectoryRight();
+void curvedTrajectoryLeft();
+void lateralArc();
