@@ -1,16 +1,5 @@
 #pragma once
 
-enum class JoystickButton {
-  Num1 = '1',
-  Num2 = '2',
-  Num3 = '3',
-  Num4 = '4',
-  Up = '5',
-  Down = '6',
-  Left = '7',
-  Right = '8'
-};
-
 class ICommand {
  public:
   virtual void execute() = 0;
@@ -83,16 +72,6 @@ class LateralArcCommand : public ICommand {
 };
 
 class StopCommand : public ICommand {
- public:
-  void execute() override;
-};
-
-class ManualCommand : public ICommand {
- public:
-  void execute() override;
-};
-
-class LineFollowingCommand : public ICommand {
  public:
   void execute() override;
 };

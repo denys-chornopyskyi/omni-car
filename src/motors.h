@@ -63,8 +63,8 @@ void backwardLeft();
 
 void turningRight();
 void turningLeft();
-void curvedTrajectoryRight();
-void curvedTrajectoryLeft();
+void curvedTrajectoryRight(float cK = curveK);
+void curvedTrajectoryLeft(float cK = curveK);
 void lateralArc();
 
 #endif

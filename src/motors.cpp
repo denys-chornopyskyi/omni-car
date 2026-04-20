@@ -150,16 +150,16 @@ void lateralArc() {
   motorD.stop();
 }
 
-void curvedTrajectoryRight() {
-  motorA.setSpeed(applyK(baseSpeed, curveK));
-  motorB.setSpeed(applyK(baseSpeed, curveK));
+void curvedTrajectoryRight(float cK) {
+  motorA.setSpeed(applyK(baseSpeed, cK));
+  motorB.setSpeed(applyK(baseSpeed, cK));
   motorC.setSpeed(applyK(baseSpeed, kC));
   motorD.setSpeed(applyK(baseSpeed, kD));
 }
 
-void curvedTrajectoryLeft() {
+void curvedTrajectoryLeft(float cK) {
   motorA.setSpeed(applyK(baseSpeed, kA));
   motorB.setSpeed(applyK(baseSpeed, kB));
-  motorC.setSpeed(applyK(baseSpeed, curveK));
-  motorD.setSpeed(applyK(baseSpeed, curveK));
+  motorC.setSpeed(applyK(baseSpeed, cK));
+  motorD.setSpeed(applyK(baseSpeed, cK));
 }

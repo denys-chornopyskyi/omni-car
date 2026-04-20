@@ -1,65 +1,64 @@
-#include <motors.h>
-#include <ble.h>
-#include "CommandHandler.h"
-#include <BLEDevice.h> // zakladni inicializace BLE cipu
-#include <BLEServer.h> // esp32 jako BLE server ke kteremu se pripojuji ostatni
-#include <BLEUtils.h>  // pomocne funkce
-#include <BLE2902.h>   // descriptor ktery rika iphonu tato charekteristika umi posilat notifikace
+#include "ble.h"
+
+#include <Arduino.h>
+#include <BLE2902.h>
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLEUtils.h>
+
+#include "queue.h"
 
 #define SERVICE_UUID "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHAR_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHAR_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
-BLECharacteristic *pTx;
-bool pripojeno = false;
+BLECharacteristic* pTx;
+bool isConnected = false;
 
-class SpojeniCallback : public BLEServerCallbacks
-{
-  void onConnect(BLEServer *s)
-  {
-    pripojeno = true;
-    Serial.println("iPhone pripojeny!");
+class SpojeniCallback : public BLEServerCallbacks {
+  void onConnect(BLEServer* s) {
+    isConnected = true;
+    Serial.println("iPhone connected!");
   }
-  void onDisconnect(BLEServer *s)
-  {
-    pripojeno = false;
-    Serial.println("iPhone odpojen.");
-    s->startAdvertising();
+  void onDisconnect(BLEServer* s) {
+    isConnected = false;
+    Serial.println("iPhone unconnected!.");
+    s->getAdvertising()->start();
   }
 };
 
-class PrijataDataCallback : public BLECharacteristicCallbacks
-{
-  void onWrite(BLECharacteristic *c)
-  {
+class PrijataDataCallback : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic* c) {
     String cmd = c->getValue().c_str();
-
-    String result = Commands.handle(cmd);
-
-    pTx->setValue(result.c_str());
-    pTx->notify();
+    cmd.trim();
+    queueSend(cmd);
   }
 };
 
-void bleInit()
-{
+void bleInit() {
   BLEDevice::init("ESP32");
-  BLEServer *server = BLEDevice::createServer();
+  BLEServer* server = BLEDevice::createServer();
   server->setCallbacks(new SpojeniCallback());
 
-  BLEService *service = server->createService(SERVICE_UUID);
+  BLEService* service = server->createService(SERVICE_UUID);
 
   pTx = service->createCharacteristic(CHAR_TX, BLECharacteristic::PROPERTY_NOTIFY);
   pTx->addDescriptor(new BLE2902());
 
-  BLECharacteristic *pRx = service->createCharacteristic(CHAR_RX, BLECharacteristic::PROPERTY_WRITE);
+  BLECharacteristic* pRx = service->createCharacteristic(CHAR_RX, BLECharacteristic::PROPERTY_WRITE);
   pRx->setCallbacks(new PrijataDataCallback());
 
   service->start();
   server->getAdvertising()->start();
-  Serial.println("BLE bezi, cekam na iPhone...");
+  Serial.println("BLE is running, waiting for iphone...");
 }
 
-void bleLoop()
-{
+void bleLoop() {
+}
+
+void bleSend(String& msg) {
+  if (!isConnected) return;
+
+  pTx->setValue(msg.c_str());
+  pTx->notify();
 }

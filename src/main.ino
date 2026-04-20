@@ -1,20 +1,23 @@
-#include "CommandHandler.h"
-#include "LineFollower.h"
+#include "ModuleHandler.h"
 #include "ble.h"
 #include "motors.h"
+#include "queue.h"
+
+ModuleHandler Module;
 
 void setup() {
   Serial.begin(115200);
   motorsInit();
+  queueInit();
   bleInit();
 }
 
 void loop() {
-  switch (currentMode) {
-    case Mode::Manual:
-      break;
-    case Mode::LineFollow:
-      lineFollower->update();
-      break;
+  String cmd;
+  if (queueReceive(cmd)) {
+    String response = Module.handleCommand(cmd);
+    bleSend(response);
   }
+
+  Module.update();
 }
