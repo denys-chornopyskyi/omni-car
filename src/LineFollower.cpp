@@ -1,39 +1,85 @@
 #include "LineFollower.h"
 
-LineFollower* lineFollower = nullptr;
+#include "Logger.h"
+#include "ManualModule.h"
+#include "Response.h"
+#include "SensorStore.h"
+#include "ble.h"
 
-LineFollower::LineFollower() : mySerial(2) {
-  mySerial.begin(9600, SERIAL_8N1, RX, TX);
+LineFollower::LineFollower(MotionController& motion) : _motion(&motion) {
+  _curveRange.start = 0;
+  _curveRange.end = 0.7;
+  Logger::info("Line iniated");
 }
 
-String LineFollower::handleCommand(String cmd) {
-  return "unsupported";
+void LineFollower::begin() {
+  _commands["crs?"] = [this](std::string v) {
+    return Response::ok("curveRangeStart=" + std::to_string(_curveRange.start));
+  };
+  _commands["crs"] = [this](std::string v) {
+    _curveRange.start = atof(v.c_str());
+    return Response::ok("curveRangeStart=" + std::to_string(_curveRange.start));
+  };
+  _commands["cre?"] = [this](std::string v) {
+    return Response::ok("curveRangeEnd=" + std::to_string(_curveRange.end));
+  };
+  _commands["cre"] = [this](std::string v) {
+    _curveRange.end = atof(v.c_str());
+    return Response::ok("curveRangeEnd=" + std::to_string(_curveRange.end));
+  };
 }
 
-LineFollower::~LineFollower() { stopAll(); }
-
-void LineFollower::receiveSensorData() {
-  while (mySerial.available() >= 6) {
-    if (mySerial.peek() == 0xFF) {
-      mySerial.read();
-      for (uint8_t i = 0; i < 5; i++) {
-        _sensorValues[i] = mySerial.read();
-      }
-    }
-    mySerial.read();
+std::string LineFollower::handleCommand(std::string name, std::string value) {
+  if (_commands.count(name)) {
+    return _commands[name](value);
   }
+
+  return Response::err(name);
 }
+
+LineFollower::~LineFollower() { _motion->stopAll(); }
 
 void LineFollower::calibrate() {
+  float correction;
+  do {
+    receiveSensorData();
+    correction = calcPosition();
+
+    if (!correction) break;
+
+    if (correction > 0) {
+      _motion->turningRight();
+    } else {
+      _motion->turningLeft();
+    }
+
+  } while (correction);
+  _motion->stopAll();
+}
+
+float LineFollower::mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 float LineFollower::calcPosition() {
-  uint8_t* v = _sensorValues;
-  int8_t sum = v[0] + v[1] + v[2] + v[3] + v[4];
+  using IRArray = uint8_t[5];
+  IRArray& ir = SensorStore::getInstance().data.ir;
+  int8_t sum = ir[0] + ir[1] + ir[2] + ir[3] + ir[4];
 
-  return (-2 * v[0] + -1 * v[1] + 0 * v[2] + 1 * v[3] + 2 * v[4]) / sum;
+  if (sum == 0) return 0;
+
+  return (-2 * ir[0] + -1 * ir[1] + 0 * ir[2] + 1 * ir[3] + 2 * ir[4]) / (float)sum;
 }
 
 void LineFollower::update() {
-  receiveSensorData();
+  auto convertedValue = calcPosition();
+  Logger::info(std::to_string(convertedValue));
+  auto _curveK = mapFloat(abs(convertedValue), 0, 2, _curveRange.start, _curveRange.end);
+  if (convertedValue == 0) {
+    _motion->forward();
+  } else if (convertedValue > 0) {
+    _motion->curvedTrajectoryRight(_curveK);
+  } else {
+    _motion->curvedTrajectoryLeft(_curveK);
+  }
 }
