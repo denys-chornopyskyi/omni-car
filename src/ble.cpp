@@ -1,64 +1,69 @@
 #include "ble.h"
 
 #include <Arduino.h>
-#include <BLE2902.h>
-#include <BLEDevice.h>
-#include <BLEServer.h>
-#include <BLEUtils.h>
+#include <NimBLEDevice.h>
 
+#include "Logger.h"
 #include "queue.h"
 
 #define SERVICE_UUID "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHAR_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHAR_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
-BLECharacteristic* pTx;
+NimBLECharacteristic* pTx;
 bool isConnected = false;
 
-class SpojeniCallback : public BLEServerCallbacks {
-  void onConnect(BLEServer* s) {
+class ConnectionCallback : public NimBLEServerCallbacks {
+  void onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo) {
     isConnected = true;
-    Serial.println("iPhone connected!");
+    Logger::info("iPhone connected!");
   }
-  void onDisconnect(BLEServer* s) {
+  void onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason) {
     isConnected = false;
-    Serial.println("iPhone unconnected!.");
-    s->getAdvertising()->start();
+    Logger::info("iPhone unconnected!.");
+    pServer->startAdvertising();
   }
 };
 
-class PrijataDataCallback : public BLECharacteristicCallbacks {
-  void onWrite(BLECharacteristic* c) {
-    String cmd = c->getValue().c_str();
-    cmd.trim();
-    queueSend(cmd);
+class IncomeDataCallback : public NimBLECharacteristicCallbacks {
+  void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) override {
+    std::string value = pCharacteristic->getValue();
+    queueSend(value.c_str());
   }
 };
 
 void bleInit() {
-  BLEDevice::init("ESP32");
-  BLEServer* server = BLEDevice::createServer();
-  server->setCallbacks(new SpojeniCallback());
+  NimBLEDevice::init("ESP32");
+  NimBLEServer* server = NimBLEDevice::createServer();
+  server->setCallbacks(new ConnectionCallback(), true);
 
-  BLEService* service = server->createService(SERVICE_UUID);
+  NimBLEService* service = server->createService(SERVICE_UUID);
 
-  pTx = service->createCharacteristic(CHAR_TX, BLECharacteristic::PROPERTY_NOTIFY);
-  pTx->addDescriptor(new BLE2902());
+  pTx = service->createCharacteristic(CHAR_TX, NIMBLE_PROPERTY::NOTIFY);
+  pTx->createDescriptor("2902");
 
-  BLECharacteristic* pRx = service->createCharacteristic(CHAR_RX, BLECharacteristic::PROPERTY_WRITE);
-  pRx->setCallbacks(new PrijataDataCallback());
+  NimBLECharacteristic* pRx = service->createCharacteristic(CHAR_RX, NIMBLE_PROPERTY::WRITE);
+  pRx->setCallbacks(new IncomeDataCallback());
 
-  service->start();
-  server->getAdvertising()->start();
-  Serial.println("BLE is running, waiting for iphone...");
+  NimBLEAdvertising* adv = server->getAdvertising();
+  adv->addServiceUUID(SERVICE_UUID);
+  adv->start();
+  Logger::info("BLE is running, waiting for iphone...");
 }
 
 void bleLoop() {
 }
 
-void bleSend(String& msg) {
+void bleSend(const char* msg) {
   if (!isConnected) return;
 
-  pTx->setValue(msg.c_str());
+  pTx->setValue(msg);
+  pTx->notify();
+}
+
+void bleSend(std::string msg) {
+  if (!isConnected) return;
+
+  pTx->setValue(msg);
   pTx->notify();
 }

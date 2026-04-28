@@ -6,17 +6,12 @@ void queueInit() {
   commandQueue = xQueueCreate(10, sizeof(char) * 32);
 }
 
-void queueSend(String cmd) {
+void queueSend(const char* cmd) {
   char buf[32];
-  cmd.toCharArray(buf, 32);
+  strncpy(buf, cmd, sizeof(buf));
   xQueueSend(commandQueue, buf, 0);
 }
 
-bool queueReceive(String& cmd) {
-  char buf[32];
-  if (xQueueReceive(commandQueue, buf, 0) == pdTRUE) {
-    cmd = String(buf);
-    return true;
-  }
-  return false;
+bool queueReceive(char* buf) {
+  return xQueueReceive(commandQueue, buf, 0) == pdTRUE;
 }
