@@ -5,6 +5,7 @@
 #include "ManualModule.h"
 #include "MockMotor.h"
 #include "MotionController.h"
+#include "ObjectAvoidance.h"
 #include "Protocol.h"
 #include "RealMotor.h"
 #include "SensorStore.h"
@@ -36,47 +37,51 @@ bool Logger::blePrint = true;
 
 HardwareSerial nanoSerial(2);
 Protocol protocol(nanoSerial);
+SafetyGuard guard;
 
-MotionController motion(&mA, &mB, &mC, &mD);
+MotionController motion(mA, mB, mC, mD);
 CommandHandler handler(motion);
 LineFollower lineModule(motion);
 ManualModule manualModule(motion);
+ObjectAvoidance avoidance(guard, motion);
 
 void setup() {
   Serial.begin(115200);
   nanoSerial.begin(9600, SERIAL_8N1, RX, TX);
   motion.init();
+  motion.attachGuard(guard);
   queueInit();
   bleInit();
 
   lineModule.begin();
   handler.begin({{"manual", &manualModule},
                  {"line", &lineModule}});
-  handler.setModule(&lineModule);
+  handler.setModule(&manualModule);
 }
 
 void loop() {
-  // char cmd[32];
-  // if (queueReceive(cmd)) {
-  //   std::string response = handler.handle(cmd);
-  //   bleSend(response.c_str());
-  // }
-  // handler.update();
   protocol.update();
-
-  SensorData& data = SensorStore::getInstance().data;
-
-  delay(500);
-
-  Serial.print(String("IR: "));
-  for (uint8_t i = 0; i < 5; i++) {
-    Serial.print(data.ir[i]);
+  avoidance.update();
+  char cmd[32];
+  if (queueReceive(cmd)) {
+    std::string response = handler.handle(cmd);
+    bleSend(response.c_str());
   }
-  Serial.println();
+  handler.update();
 
-  for (uint8_t i = 0; i < 4; i++) {
-    Serial.print(String("Sensor") + i + ": ");
-    Serial.println(data.distance[i]);
-  }
+  // SensorData& data = SensorStore::getInstance().data;
+
+  // delay(500);
+
+  // Serial.print(String("IR: "));
+  // for (uint8_t i = 0; i < 5; i++) {
+  //   Serial.print(data.ir[i]);
+  // }
+  // Serial.println();
+
+  // for (uint8_t i = 0; i < 4; i++) {
+  //   Serial.print(String("Sensor") + i + ": ");
+  //   Serial.println(data.distance[i]);
+  // }
   delay(1000);
 }

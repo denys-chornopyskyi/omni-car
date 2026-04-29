@@ -20,7 +20,7 @@ class ConnectionCallback : public NimBLEServerCallbacks {
   }
   void onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason) {
     isConnected = false;
-    Logger::info("iPhone unconnected!.");
+    Logger::info("iPhone unconnected!");
     pServer->startAdvertising();
   }
 };

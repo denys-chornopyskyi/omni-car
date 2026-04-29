@@ -10,7 +10,7 @@
 class CommandHandler {
  public:
   void begin(std::initializer_list<std::pair<const char*, IModule*>> modules);
-  CommandHandler(MotionController& motion);
+  CommandHandler(MotionController& motion) : _motion(motion) {};
   std::string handle(const char* raw);
   void setModule(IModule* module);
   void update();
@@ -21,5 +21,5 @@ class CommandHandler {
   std::map<std::string, IModule*> _modules;
 
   void _registerGlobal();
-  MotionController* _motion = nullptr;
+  MotionController& _motion;
 };

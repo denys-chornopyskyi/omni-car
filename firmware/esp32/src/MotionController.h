@@ -24,7 +24,7 @@
 
 class MotionController {
  public:
-  MotionController(IMotor* a, IMotor* b, IMotor* c, IMotor* d);
+  MotionController(IMotor& a, IMotor& b, IMotor& c, IMotor& d) : _motorA(a), _motorB(b), _motorC(c), _motorD(d) {};
   void init();
   void stopAll();
 
@@ -54,10 +54,10 @@ class MotionController {
   float kC = 1.0;
   float kD = 1.0;
   float curveK = 0.3;
-  IMotor* _motorA;
-  IMotor* _motorB;
-  IMotor* _motorC;
-  IMotor* _motorD;
+  IMotor& _motorA;
+  IMotor& _motorB;
+  IMotor& _motorC;
+  IMotor& _motorD;
 
  private:
   int16_t applyK(int16_t speed, float k);

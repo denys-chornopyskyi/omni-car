@@ -4,22 +4,18 @@
 
 #include "Logger.h"
 
-MotionController::MotionController(IMotor* a, IMotor* b, IMotor* c, IMotor* d)
-    : _motorA(a), _motorB(b), _motorC(c), _motorD(d) {}
-
 void MotionController::stopAll() {
   Logger::info("stop");
-  _motorA->setSpeed(0);
-  _motorB->setSpeed(0);
-  _motorC->setSpeed(0);
-  _motorD->setSpeed(0);
+  _motorA.setSpeed(0);
+  _motorB.setSpeed(0);
+  _motorC.setSpeed(0);
+  _motorD.setSpeed(0);
 }
-
 void MotionController::init() {
-  _motorA->init();
-  _motorB->init();
-  _motorC->init();
-  _motorD->init();
+  _motorA.init();
+  _motorB.init();
+  _motorC.init();
+  _motorD.init();
 
 #ifndef DEBUGE_MODE
   pinMode(STBY1, OUTPUT);
@@ -48,10 +44,10 @@ void MotionController::forward() {
     return;
   }
   Logger::info("forward");
-  _motorA->setSpeed(applyK(baseSpeed, kA));
-  _motorB->setSpeed(applyK(baseSpeed, kB));
-  _motorC->setSpeed(applyK(baseSpeed, kC));
-  _motorD->setSpeed(applyK(baseSpeed, kD));
+  _motorA.setSpeed(applyK(baseSpeed, kA));
+  _motorB.setSpeed(applyK(baseSpeed, kB));
+  _motorC.setSpeed(applyK(baseSpeed, kC));
+  _motorD.setSpeed(applyK(baseSpeed, kD));
 }
 
 void MotionController::backward() {
@@ -60,10 +56,10 @@ void MotionController::backward() {
     return;
   }
   Logger::info("backward");
-  _motorA->setSpeed(applyK(-baseSpeed, kA));
-  _motorB->setSpeed(applyK(-baseSpeed, kB));
-  _motorC->setSpeed(applyK(-baseSpeed, kC));
-  _motorD->setSpeed(applyK(-baseSpeed, kD));
+  _motorA.setSpeed(applyK(-baseSpeed, kA));
+  _motorB.setSpeed(applyK(-baseSpeed, kB));
+  _motorC.setSpeed(applyK(-baseSpeed, kC));
+  _motorD.setSpeed(applyK(-baseSpeed, kD));
 }
 
 void MotionController::left() {
@@ -72,10 +68,10 @@ void MotionController::left() {
     return;
   }
   Logger::info("left");
-  _motorA->setSpeed(applyK(baseSpeed, kA));
-  _motorB->setSpeed(applyK(-baseSpeed, kB));
-  _motorC->setSpeed(applyK(-baseSpeed, kC));
-  _motorD->setSpeed(applyK(baseSpeed, kD));
+  _motorA.setSpeed(applyK(baseSpeed, kA));
+  _motorB.setSpeed(applyK(-baseSpeed, kB));
+  _motorC.setSpeed(applyK(-baseSpeed, kC));
+  _motorD.setSpeed(applyK(baseSpeed, kD));
 }
 
 void MotionController::right() {
@@ -84,10 +80,10 @@ void MotionController::right() {
     return;
   }
   Logger::info("right");
-  _motorA->setSpeed(applyK(-baseSpeed, kA));
-  _motorB->setSpeed(applyK(baseSpeed, kB));
-  _motorC->setSpeed(applyK(baseSpeed, kC));
-  _motorD->setSpeed(applyK(-baseSpeed, kD));
+  _motorA.setSpeed(applyK(-baseSpeed, kA));
+  _motorB.setSpeed(applyK(baseSpeed, kB));
+  _motorC.setSpeed(applyK(baseSpeed, kC));
+  _motorD.setSpeed(applyK(-baseSpeed, kD));
 }
 
 void MotionController::forwardRight() {
@@ -96,10 +92,10 @@ void MotionController::forwardRight() {
     return;
   }
   Logger::info("forwardRight");
-  _motorA->setSpeed(0);
-  _motorB->setSpeed(applyK(baseSpeed, kB));
-  _motorC->setSpeed(applyK(baseSpeed, kC));
-  _motorD->setSpeed(0);
+  _motorA.setSpeed(0);
+  _motorB.setSpeed(applyK(baseSpeed, kB));
+  _motorC.setSpeed(applyK(baseSpeed, kC));
+  _motorD.setSpeed(0);
 }
 
 void MotionController::forwardLeft() {
@@ -108,10 +104,10 @@ void MotionController::forwardLeft() {
     return;
   }
   Logger::info("forwardLeft");
-  _motorA->setSpeed(applyK(baseSpeed, kA));
-  _motorB->setSpeed(0);
-  _motorC->setSpeed(0);
-  _motorD->setSpeed(applyK(baseSpeed, kD));
+  _motorA.setSpeed(applyK(baseSpeed, kA));
+  _motorB.setSpeed(0);
+  _motorC.setSpeed(0);
+  _motorD.setSpeed(applyK(baseSpeed, kD));
 }
 
 void MotionController::backwardRight() {
@@ -120,10 +116,10 @@ void MotionController::backwardRight() {
     return;
   }
   Logger::info("backwardRight");
-  _motorA->setSpeed(applyK(-baseSpeed, kA));
-  _motorB->setSpeed(0);
-  _motorC->setSpeed(0);
-  _motorD->setSpeed(applyK(-baseSpeed, kD));
+  _motorA.setSpeed(applyK(-baseSpeed, kA));
+  _motorB.setSpeed(0);
+  _motorC.setSpeed(0);
+  _motorD.setSpeed(applyK(-baseSpeed, kD));
 }
 
 void MotionController::backwardLeft() {
@@ -132,26 +128,26 @@ void MotionController::backwardLeft() {
     return;
   }
   Logger::info("backwardLeft");
-  _motorA->setSpeed(0);
-  _motorB->setSpeed(applyK(-baseSpeed, kB));
-  _motorC->setSpeed(applyK(-baseSpeed, kC));
-  _motorD->setSpeed(0);
+  _motorA.setSpeed(0);
+  _motorB.setSpeed(applyK(-baseSpeed, kB));
+  _motorC.setSpeed(applyK(-baseSpeed, kC));
+  _motorD.setSpeed(0);
 }
 
 void MotionController::turningRight() {
   Logger::info("turningRight");
-  _motorA->setSpeed(applyK(baseSpeed, kA));
-  _motorB->setSpeed(applyK(baseSpeed, kB));
-  _motorC->setSpeed(applyK(-baseSpeed, kC));
-  _motorD->setSpeed(applyK(-baseSpeed, kD));
+  _motorA.setSpeed(applyK(baseSpeed, kA));
+  _motorB.setSpeed(applyK(baseSpeed, kB));
+  _motorC.setSpeed(applyK(-baseSpeed, kC));
+  _motorD.setSpeed(applyK(-baseSpeed, kD));
 }
 
 void MotionController::turningLeft() {
   Logger::info("turningLeft");
-  _motorA->setSpeed(applyK(-baseSpeed, kA));
-  _motorB->setSpeed(applyK(-baseSpeed, kB));
-  _motorC->setSpeed(applyK(baseSpeed, kC));
-  _motorD->setSpeed(applyK(baseSpeed, kD));
+  _motorA.setSpeed(applyK(-baseSpeed, kA));
+  _motorB.setSpeed(applyK(-baseSpeed, kB));
+  _motorC.setSpeed(applyK(baseSpeed, kC));
+  _motorD.setSpeed(applyK(baseSpeed, kD));
 }
 
 void MotionController::lateralArc() {
@@ -160,10 +156,10 @@ void MotionController::lateralArc() {
     return;
   }
   Logger::info("lateralArc");
-  _motorA->setSpeed(applyK(baseSpeed, kA));
-  _motorB->setSpeed(0);
-  _motorC->setSpeed(applyK(-baseSpeed, kC));
-  _motorD->setSpeed(0);
+  _motorA.setSpeed(applyK(baseSpeed, kA));
+  _motorB.setSpeed(0);
+  _motorC.setSpeed(applyK(-baseSpeed, kC));
+  _motorD.setSpeed(0);
 }
 
 void MotionController::curvedTrajectoryRight() {
@@ -172,10 +168,10 @@ void MotionController::curvedTrajectoryRight() {
     return;
   }
   Logger::info("curvedTrajectoryRight");
-  _motorA->setSpeed(applyK(baseSpeed, curveK));
-  _motorB->setSpeed(applyK(baseSpeed, curveK));
-  _motorC->setSpeed(applyK(baseSpeed, kC));
-  _motorD->setSpeed(applyK(baseSpeed, kD));
+  _motorA.setSpeed(applyK(baseSpeed, curveK));
+  _motorB.setSpeed(applyK(baseSpeed, curveK));
+  _motorC.setSpeed(applyK(baseSpeed, kC));
+  _motorD.setSpeed(applyK(baseSpeed, kD));
 }
 
 void MotionController::curvedTrajectoryRight(float cK) {
@@ -187,10 +183,10 @@ void MotionController::curvedTrajectoryRight(float cK) {
   snprintf(buf, sizeof(buf), "%.2f", cK);
   Logger::info(buf);
   Logger::info("curvedTrajectoryRight");
-  _motorA->setSpeed(applyK(baseSpeed, 1.0 - cK));
-  _motorB->setSpeed(applyK(baseSpeed, 1.0 - cK));
-  _motorC->setSpeed(applyK(baseSpeed, kC));
-  _motorD->setSpeed(applyK(baseSpeed, kD));
+  _motorA.setSpeed(applyK(baseSpeed, 1.0 - cK));
+  _motorB.setSpeed(applyK(baseSpeed, 1.0 - cK));
+  _motorC.setSpeed(applyK(baseSpeed, kC));
+  _motorD.setSpeed(applyK(baseSpeed, kD));
 }
 
 void MotionController::curvedTrajectoryLeft() {
@@ -199,10 +195,10 @@ void MotionController::curvedTrajectoryLeft() {
     return;
   }
   Logger::info("curvedTrajectoryLeft");
-  _motorA->setSpeed(applyK(baseSpeed, kA));
-  _motorB->setSpeed(applyK(baseSpeed, kB));
-  _motorC->setSpeed(applyK(baseSpeed, curveK));
-  _motorD->setSpeed(applyK(baseSpeed, curveK));
+  _motorA.setSpeed(applyK(baseSpeed, kA));
+  _motorB.setSpeed(applyK(baseSpeed, kB));
+  _motorC.setSpeed(applyK(baseSpeed, curveK));
+  _motorD.setSpeed(applyK(baseSpeed, curveK));
 }
 
 void MotionController::curvedTrajectoryLeft(float cK) {
@@ -214,8 +210,8 @@ void MotionController::curvedTrajectoryLeft(float cK) {
   snprintf(buf, sizeof(buf), "%.2f", cK);
   Logger::info(buf);
   Logger::info("curvedTrajectoryLeft");
-  _motorA->setSpeed(applyK(baseSpeed, kA));
-  _motorB->setSpeed(applyK(baseSpeed, kB));
-  _motorC->setSpeed(applyK(baseSpeed, 1.0 - cK));
-  _motorD->setSpeed(applyK(baseSpeed, 1.0 - cK));
+  _motorA.setSpeed(applyK(baseSpeed, kA));
+  _motorB.setSpeed(applyK(baseSpeed, kB));
+  _motorC.setSpeed(applyK(baseSpeed, 1.0 - cK));
+  _motorD.setSpeed(applyK(baseSpeed, 1.0 - cK));
 }

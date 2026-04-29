@@ -1,80 +1,82 @@
 #include "CommandHandler.h"
 
 #include "Logger.h"
+#include "ObjectAvoidance.h"
 #include "Response.h"
 
 void CommandHandler::_registerGlobal() {
   _global["base"] = [this](std::string v) {
-    _motion->baseSpeed = atoi(v.c_str()); 
+    _motion.baseSpeed = atoi(v.c_str()); 
     return Response::ok("base= " + std::string(v)); };
+
   _global["kA"] = [this](std::string v) {
-    _motion->kA = atof(v.c_str());
+    _motion.kA = atof(v.c_str());
     return Response::ok("kA=" + std::string(v));
   };
 
   _global["kB"] = [this](std::string v) {
-    _motion->kB = atof(v.c_str());
+    _motion.kB = atof(v.c_str());
     return Response::ok("kB=" + std::string(v));
   };
 
   _global["kC"] = [this](std::string v) {
-    _motion->kC = atof(v.c_str());
+    _motion.kC = atof(v.c_str());
     return Response::ok("kC=" + std::string(v));
   };
 
   _global["kD"] = [this](std::string v) {
-    _motion->kD = atof(v.c_str());
+    _motion.kD = atof(v.c_str());
     return Response::ok("kD=" + std::string(v));
   };
 
   // Query parameters
   _global["kA?"] = [this](std::string v) {
-    return Response::ok("kA=" + std::to_string(_motion->kA));
+    return Response::ok("kA=" + std::to_string(_motion.kA));
   };
 
   _global["kB?"] = [this](std::string v) {
-    return Response::ok("kB=" + std::to_string(_motion->kB));
+    return Response::ok("kB=" + std::to_string(_motion.kB));
   };
 
   _global["kC?"] = [this](std::string v) {
-    return Response::ok("kC=" + std::to_string(_motion->kC));
+    return Response::ok("kC=" + std::to_string(_motion.kC));
   };
 
   _global["kD?"] = [this](std::string v) {
-    return Response::ok("kD=" + std::to_string(_motion->kD));
+    return Response::ok("kD=" + std::to_string(_motion.kD));
   };
 
   _global["base?"] = [this](std::string v) {
-    return Response::ok("base=" + std::to_string(_motion->baseSpeed));
+    return Response::ok("base=" + std::to_string(_motion.baseSpeed));
   };
 
   _global["cK?"] = [this](std::string v) {
-    return Response::ok("cK=" + std::to_string(_motion->curveK));
+    return Response::ok("cK=" + std::to_string(_motion.curveK));
   };
 
   // Motor speed control
   _global["mA"] = [this](std::string v) {
-    _motion->_motorA->setSpeed(atoi(v.c_str()));
+    _motion._motorA.setSpeed(atoi(v.c_str()));
     return Response::ok("mA=" + std::string(v));
   };
 
   _global["mB"] = [this](std::string v) {
-    _motion->_motorB->setSpeed(atoi(v.c_str()));
+    _motion._motorB.setSpeed(atoi(v.c_str()));
     return Response::ok("mB=" + std::string(v));
   };
 
   _global["mC"] = [this](std::string v) {
-    _motion->_motorC->setSpeed(atoi(v.c_str()));
+    _motion._motorC.setSpeed(atoi(v.c_str()));
     return Response::ok("mC=" + std::string(v));
   };
 
   _global["mD"] = [this](std::string v) {
-    _motion->_motorD->setSpeed(atoi(v.c_str()));
+    _motion._motorD.setSpeed(atoi(v.c_str()));
     return Response::ok("mD=" + std::string(v));
   };
 
   _global["cK"] = [this](std::string v) {
-    _motion->curveK = atof(v.c_str());
+    _motion.curveK = atof(v.c_str());
     return Response::ok("cK=" + std::string(v));
   };
 
@@ -90,10 +92,22 @@ void CommandHandler::_registerGlobal() {
     Logger::blePrint = !Logger::blePrint;
     return Response::ok("bleprint");
   };
-  Logger::info("_globalRegister");
-}
 
-CommandHandler::CommandHandler(MotionController& motion) : _motion(&motion) {};
+  _global["safetymode"] = [this](std::string v) {
+    bool state = ObjectAvoidance::isEnabled();
+    ObjectAvoidance::setEnabled(!ObjectAvoidance::isEnabled());
+    return Response::ok("satetymode: " + ObjectAvoidance::isEnabled() ? "on" : "off");
+  };
+
+  _global["threshold?"] = [this](std::string v) {
+    return Response::ok("threshold=" + ObjectAvoidance::getThreshold());
+  };
+
+  _global["threshold"] = [this](std::string v) {
+    ObjectAvoidance::setThreshold(atoi(v.c_str()));
+    return Response::ok("threshold=" + ObjectAvoidance::getThreshold());
+  };
+}
 
 void CommandHandler::begin(std::initializer_list<std::pair<const char*, IModule*>> modules) {
   for (auto& pair : modules) {
