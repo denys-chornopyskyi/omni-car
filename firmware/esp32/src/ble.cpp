@@ -28,6 +28,7 @@ class ConnectionCallback : public NimBLEServerCallbacks {
 class IncomeDataCallback : public NimBLECharacteristicCallbacks {
   void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) override {
     std::string value = pCharacteristic->getValue();
+    Logger::info(value);
     queueSend(value.c_str());
   }
 };
@@ -55,6 +56,7 @@ void bleLoop() {
 }
 
 void bleSend(const char* msg) {
+  // if ((msg != NULL) && (msg[0] == '\0')) return;
   if (!isConnected) return;
 
   pTx->setValue(msg);
@@ -62,8 +64,8 @@ void bleSend(const char* msg) {
 }
 
 void bleSend(std::string msg) {
+   if (msg.empty()) return;
   if (!isConnected) return;
-
   pTx->setValue(msg);
   pTx->notify();
 }

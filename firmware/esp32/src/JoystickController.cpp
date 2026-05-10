@@ -8,16 +8,17 @@ JoystickController::JoystickController(MotionController& motion) : _motion(&moti
       {{JoystickButton::Down}, [this]() { _motion->backward(); }},
       {{JoystickButton::Left}, [this]() { _motion->left(); }},
       {{JoystickButton::Right}, [this]() { _motion->right(); }},
-      {{JoystickButton::Up, JoystickButton::Left}, [this]() { _motion->forwardLeft(); }},
-      {{JoystickButton::Up, JoystickButton::Right}, [this]() { _motion->forwardRight(); }},
-      {{JoystickButton::Down, JoystickButton::Left}, [this]() { _motion->backwardLeft(); }},
-      {{JoystickButton::Down, JoystickButton::Right}, [this]() { _motion->backwardRight(); }},
-      {{JoystickButton::Num2, JoystickButton::Num4}, [this]() { _motion->turningRight(); }},
-      {{JoystickButton::Num1, JoystickButton::Num3}, [this]() { _motion->turningLeft(); }},
-      {{JoystickButton::Num1, JoystickButton::Up}, [this]() { _motion->curvedTrajectoryLeft(); }},
-      {{JoystickButton::Num2, JoystickButton::Up}, [this]() { _motion->curvedTrajectoryRight(); }},
-      {{JoystickButton::Num3, JoystickButton::Up}, [this]() { _motion->lateralArc(); }},
+      {{JoystickButton::UpLeft}, [this]() { _motion->forwardLeft(); }},
+      {{JoystickButton::UpRight}, [this]() { _motion->forwardRight(); }},
+      {{JoystickButton::DownLeft}, [this]() { _motion->backwardLeft(); }},
+      {{JoystickButton::DownRight}, [this]() { _motion->backwardRight(); }},
+      {{JoystickButton::Center, JoystickButton::Right}, [this]() { _motion->turningRight(); }},
+      {{JoystickButton::Center, JoystickButton::Left}, [this]() { _motion->turningLeft(); }},
+      {{JoystickButton::Up, JoystickButton::UpLeft}, [this]() { _motion->curvedTrajectoryLeft(); }},
+      {{JoystickButton::Up, JoystickButton::UpRight}, [this]() { _motion->curvedTrajectoryRight(); }},
+      {{JoystickButton::Center, JoystickButton::Right}, [this]() { _motion->lateralArc(); }},
   };
+
 }
 
 void JoystickController::updateMotors() {
@@ -43,11 +44,11 @@ void JoystickController::keyDown(JoystickButton btn) {
 using Button = JoystickController::JoystickButton;
 
 std::string JoystickController::handle(std::string cmd) {
-  JoystickButton btn = (JoystickButton)cmd[2];
+  JoystickButton btn = static_cast<JoystickButton>(cmd[2]);
 
   bool isPressed = cmd[3] == '1';
 
   isPressed ? keyDown(btn) : keyUp(btn);
 
-  return Response::ok("handled");
+  return std::string("");
 }

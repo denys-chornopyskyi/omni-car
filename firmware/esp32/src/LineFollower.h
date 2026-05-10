@@ -12,7 +12,7 @@ class LineFollower : public IModule {
   void begin();
   LineFollower(MotionController& motion);
   ~LineFollower();
-  std::string handleCommand(std::string name, std::string value) override;
+  std::string handleCommand(std::string& name, std::string& value) override;
   void update() override;
 
  private:

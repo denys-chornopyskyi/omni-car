@@ -10,8 +10,8 @@
 
 class ManualModule : public IModule {
  public:
-  ManualModule(MotionController& motion);
-  std::string handleCommand(std::string name, std::string value);
+  ManualModule(MotionController& motion) : joystick(motion) {}
+  std::string handleCommand(std::string& name, std::string& value);
 
  private:
   JoystickController joystick;

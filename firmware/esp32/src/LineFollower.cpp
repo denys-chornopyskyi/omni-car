@@ -29,7 +29,7 @@ void LineFollower::begin() {
   };
 }
 
-std::string LineFollower::handleCommand(std::string name, std::string value) {
+std::string LineFollower::handleCommand(std::string& name, std::string& value) {
   if (_commands.count(name)) {
     return _commands[name](value);
   }

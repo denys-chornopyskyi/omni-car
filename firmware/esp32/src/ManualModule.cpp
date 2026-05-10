@@ -1,10 +1,9 @@
 #include "ManualModule.h"
+#include "Logger.h"
 
-ManualModule::ManualModule(MotionController& motion) : joystick(motion) {
-}
-
-std::string ManualModule::handleCommand(std::string name, std::string value) {
-  if (std::string(name).find('!') != -1) {
+std::string ManualModule::handleCommand(std::string& name, std::string& value) {
+  Logger::info(name);
+  if (name.find('!') != std::string::npos) {
     return joystick.handle(name);
   }
   return std::string("");

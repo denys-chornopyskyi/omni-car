@@ -28,11 +28,9 @@ RealMotor mD(M4_IN1, M4_IN2, M4_CH1, M4_CH2);
 #endif
 
 #ifdef DEBUGE_MODE
-LogLevel Logger::level = LogLevel::Info;
-bool Logger::blePrint = true;
+LogLevel Logger::level = LogLevel::Verbose;
 #else
 LogLevel Logger::level = LogLevel::Info;
-bool Logger::blePrint = true;
 #endif
 
 HardwareSerial nanoSerial(2);
@@ -49,7 +47,7 @@ void setup() {
   Serial.begin(115200);
   nanoSerial.begin(9600, SERIAL_8N1, RX, TX);
   motion.init();
-  motion.attachGuard(guard);
+  // motion.attachGuard(guard);
   queueInit();
   bleInit();
 
@@ -60,12 +58,12 @@ void setup() {
 }
 
 void loop() {
-  protocol.update();
-  avoidance.update();
+  // protocol.update();
+  // avoidance.update();
   char cmd[32];
   if (queueReceive(cmd)) {
     std::string response = handler.handle(cmd);
-    bleSend(response.c_str());
+    bleSend(response);
   }
   handler.update();
 

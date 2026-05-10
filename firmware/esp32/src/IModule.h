@@ -6,6 +6,6 @@ class IModule {
  public:
   virtual ~IModule() = default;
 
-  virtual std::string handleCommand(std::string name, std::string value) = 0;
+  virtual std::string handleCommand(std::string& name, std::string& value) = 0;
   virtual void update() {};
 };

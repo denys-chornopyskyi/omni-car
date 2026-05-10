@@ -7,7 +7,7 @@
 void CommandHandler::_registerGlobal() {
   _global["base"] = [this](std::string v) {
     _motion.baseSpeed = atoi(v.c_str()); 
-    return Response::ok("base= " + std::string(v)); };
+    return Response::ok("base=" + std::string(v)); };
 
   _global["kA"] = [this](std::string v) {
     _motion.kA = atof(v.c_str());
@@ -83,20 +83,15 @@ void CommandHandler::_registerGlobal() {
   _global["module"] = [this](std::string v) {
     if (_modules.count(v)) {
       this->setModule(_modules[v]);
-      return Response::ok("module: " + v);
+      return Response::ok("module=" + v);
     }
-    return std::string("");
-  };
-
-  _global["bleprint"] = [this](std::string v) {
-    Logger::blePrint = !Logger::blePrint;
-    return Response::ok("bleprint");
+    return Response::err("module=" + v);
   };
 
   _global["safetymode"] = [this](std::string v) {
     bool state = ObjectAvoidance::isEnabled();
     ObjectAvoidance::setEnabled(!ObjectAvoidance::isEnabled());
-    return Response::ok("satetymode: " + ObjectAvoidance::isEnabled() ? "on" : "off");
+    return Response::ok("satetymode=" + ObjectAvoidance::isEnabled() ? "on" : "off");
   };
 
   _global["threshold?"] = [this](std::string v) {
@@ -106,6 +101,11 @@ void CommandHandler::_registerGlobal() {
   _global["threshold"] = [this](std::string v) {
     ObjectAvoidance::setThreshold(atoi(v.c_str()));
     return Response::ok("threshold=" + ObjectAvoidance::getThreshold());
+  };
+
+  _global["stop"] = [this](std::string v) {
+   _motion.stopAll();
+    return std::string("");
   };
 }
 
@@ -138,13 +138,13 @@ std::string CommandHandler::handle(const char* raw) {
   if (_global.count(name)) {
     Logger::verbose("GLOBAL");
     std::string result = _global[name](arg);
-    if (!result.empty()) return result;
+    return result;
   }
 
   if (_activeModule) {
     Logger::verbose("ACTIVE MODULE");
     std::string result = _activeModule->handleCommand(name, arg);
-    if (!result.empty()) return result;
+    return result;
   }
 
   return Response::err(cmd);
