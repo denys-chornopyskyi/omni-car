@@ -1,21 +1,27 @@
 import PageContainer from '@/shared/components/ui/PageContainer';
+import { useDeviceStore } from '@/shared/store/deviceStore';
 import { useForm } from 'react-hook-form';
 import CalibrationForm from './components/CalibrationForm';
 import NumberField from './components/NumberField';
 
 type CalibrationFormValues = {
-  base: number;
-  cK: number;
+  base: string;
+  cK: string;
 };
 
 export default function CalibrationTab() {
+  const setSpeed = useDeviceStore((s) => s.setSpeed);
   const { control, handleSubmit } = useForm<CalibrationFormValues>({
-    defaultValues: { base: 200, cK: 0.7 },
+    defaultValues: { base: '200', cK: '0.7' },
   });
 
   return (
     <PageContainer>
-      <CalibrationForm handleSubmit={handleSubmit}>
+      <CalibrationForm
+        handleSubmit={handleSubmit}
+        onSubmit={(data) => {
+          setSpeed(Number(data.base));
+        }}>
         <NumberField
           label="base"
           name="base"

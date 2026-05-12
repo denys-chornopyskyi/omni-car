@@ -2,12 +2,12 @@ import Button from '@/shared/components/ui/Button';
 import SectionLabel from '@/shared/components/ui/SectionLabel';
 import log from '@/shared/utils/log';
 import { useState } from 'react';
-import { FieldValues, FormSubmitHandler, UseFormHandleSubmit } from 'react-hook-form';
+import { FieldValues, UseFormHandleSubmit } from 'react-hook-form';
 import { View } from 'react-native';
 
 type CalibrationFormProps<T extends FieldValues> = {
   handleSubmit: UseFormHandleSubmit<T>;
-  onSubmit?: FormSubmitHandler<T>;
+  onSubmit?: (data: T) => void;
   children: React.ReactNode;
 };
 

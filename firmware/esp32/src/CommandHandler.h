@@ -15,9 +15,6 @@ class CommandHandler {
   void setModule(IModule* module);
   void update();
 
-  const enum PacketType {
-    Motion = 0x01,
-  };
 
  private:
   std::map<std::string, std::function<std::string(std::string)>> _global;
