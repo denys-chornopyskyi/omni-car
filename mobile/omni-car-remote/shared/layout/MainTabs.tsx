@@ -9,7 +9,7 @@ export default function MainTabs() {
       tabBar={(props) => <TabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        sceneStyle: { backgroundColor: '#0F172A', paddingTop: tabBarTop },
+        sceneStyle: { backgroundColor: '#0F172A', paddingTop: tabBarTop + 20 },
       }}>
       <Tabs.Screen name="index" />
       <Tabs.Screen name="calibration" />
