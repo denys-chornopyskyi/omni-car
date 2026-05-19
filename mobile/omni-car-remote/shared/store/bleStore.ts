@@ -15,7 +15,7 @@ interface BleState {
   scanning: boolean;
   connect: () => Promise<void>;
   sendAndReceive: (msg: string) => Promise<void>;
-  send: (msg: string) => Promise<void>;
+  send: (msg: string | Uint8Array) => Promise<void>;
 }
 
 export const useBleStore = create<BleState>((set, get) => ({
@@ -145,19 +145,21 @@ export const useBleStore = create<BleState>((set, get) => ({
 
       log(`Response: "${response}"`);
     } catch (e: any) {
-      log(`Sending error: ${e.message}`, 'error'); // ← message не massage
+      log(`Sending error: ${e.message}`, 'error');
     }
   },
-  send: async (msg: string) => {
+  send: async (msg: string | Uint8Array) => {
     const { device } = get();
+    log('Attemt to send');
+    log(device ? 'true' : 'false');
     if (!device) return;
 
-    const bytes = new TextEncoder().encode(msg);
+    const bytes = typeof msg === 'string' ? new TextEncoder().encode(msg) : msg;
     const base64 = btoa(String.fromCharCode(...bytes));
 
     device
-      .writeCharacteristicWithoutResponseForService(SERVICE_UUID, WRITE_UUID, base64)
-      .then(() => log('Sent'))
+      .writeCharacteristicWithResponseForService(SERVICE_UUID, WRITE_UUID, base64)
+      .then(() => log('Sent' + msg))
       .catch((e) => log(`Write error: ${e.message}`, 'error'));
   },
 }));

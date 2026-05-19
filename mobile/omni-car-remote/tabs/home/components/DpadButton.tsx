@@ -5,12 +5,18 @@ import { View } from 'react-native';
 export default function DpadButton({
   rotation = 0,
   dot,
+  onPressIn,
+  onPressOut,
 }: {
   rotation?: number;
   dot?: boolean;
+  onPressIn?: () => void;
+  onPressOut?: () => void;
 }) {
   return (
     <Button
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
       label={
         dot ? (
           <View className="w-[10px] h-[10px] bg-white rounded-full"></View>
