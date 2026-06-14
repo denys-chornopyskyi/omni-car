@@ -4,6 +4,7 @@
 
 #include "Logger.h"
 
+
 void MotionController::stopAll() {
   Logger::info("stop");
   _motorA.setSpeed(0);
@@ -13,6 +14,7 @@ void MotionController::stopAll() {
 }
 void MotionController::init() {
   _motorA.init();
+  Logger::info("MotorB");
   _motorB.init();
   _motorC.init();
   _motorD.init();
@@ -136,18 +138,18 @@ void MotionController::backwardLeft() {
 
 void MotionController::turningRight() {
   Logger::info("turningRight");
-  _motorA.setSpeed(applyK(baseSpeed, kA));
-  _motorB.setSpeed(applyK(baseSpeed, kB));
-  _motorC.setSpeed(applyK(-baseSpeed, kC));
-  _motorD.setSpeed(applyK(-baseSpeed, kD));
-}
-
-void MotionController::turningLeft() {
-  Logger::info("turningLeft");
   _motorA.setSpeed(applyK(-baseSpeed, kA));
   _motorB.setSpeed(applyK(-baseSpeed, kB));
   _motorC.setSpeed(applyK(baseSpeed, kC));
   _motorD.setSpeed(applyK(baseSpeed, kD));
+}
+
+void MotionController::turningLeft() {
+  Logger::info("turningLeft");
+  _motorA.setSpeed(applyK(baseSpeed, kA));
+  _motorB.setSpeed(applyK(baseSpeed, kB));
+  _motorC.setSpeed(applyK(-baseSpeed, kC));
+  _motorD.setSpeed(applyK(-baseSpeed, kD));
 }
 
 void MotionController::lateralArc() {
@@ -163,7 +165,7 @@ void MotionController::lateralArc() {
 }
 
 void MotionController::curvedTrajectoryRight() {
-  if (_guard && _guard->isRightBlocked()) {
+  if (_guard && _guard->isFrontBlocked()) {
     Logger::info("forward: emergency stop");
     return;
   }
@@ -187,6 +189,18 @@ void MotionController::curvedTrajectoryRight(float cK) {
   _motorB.setSpeed(applyK(baseSpeed, 1.0 - cK));
   _motorC.setSpeed(applyK(baseSpeed, kC));
   _motorD.setSpeed(applyK(baseSpeed, kD));
+}
+
+void MotionController::curvedTrajectoryBackwardRight() {
+  if (_guard && _guard->isBackBlocked()) {
+    Logger::info("backward: emergency stop");
+    return;
+  }
+  Logger::info("curvedTrajectoryBackwardRight");
+  _motorA.setSpeed(applyK(-baseSpeed, curveK));
+  _motorB.setSpeed(applyK(-baseSpeed, curveK));
+  _motorC.setSpeed(applyK(-baseSpeed, kC));
+  _motorD.setSpeed(applyK(-baseSpeed, kD));
 }
 
 void MotionController::curvedTrajectoryLeft() {
@@ -214,4 +228,36 @@ void MotionController::curvedTrajectoryLeft(float cK) {
   _motorB.setSpeed(applyK(baseSpeed, kB));
   _motorC.setSpeed(applyK(baseSpeed, 1.0 - cK));
   _motorD.setSpeed(applyK(baseSpeed, 1.0 - cK));
+}
+
+void MotionController::curvedTrajectoryBackwardLeft() {
+  if (_guard && _guard->isBackBlocked()) {
+    Logger::info("forward: emergency stop");
+    return;
+  }
+  Logger::info("curvedTrajectoryBackwardLeft");
+  _motorA.setSpeed(applyK(-baseSpeed, kA));
+  _motorB.setSpeed(applyK(-baseSpeed, kB));
+  _motorC.setSpeed(applyK(-baseSpeed, curveK));
+  _motorD.setSpeed(applyK(-baseSpeed, curveK));
+}
+
+void MotionController::arcLeft(float radius) {
+  if(_guard && _guard->isFrontBlocked()) {
+    Logger::info("forward: emergency stop");
+    return;
+  }
+
+  float half = wheelBase / 2.0f;
+  float vLeft = baseSpeed * (radius - half) / radius;
+  float vRight = baseSpeed * (radius + half) / radius;
+
+  vLeft = constrain(vLeft, 0, 255);
+  vRight = constrain(vRight, 0, 255);
+
+  Logger::info("ArcLeft");
+  _motorA.setSpeed(applyK(vLeft, kA));
+  _motorB.setSpeed(applyK(vLeft, kB));
+  _motorC.setSpeed(applyK(vRight, kC));
+  _motorD.setSpeed(applyK(vRight, kD));
 }

@@ -5,9 +5,8 @@
 
 class RealMotor : public IMotor {
  public:
-  RealMotor(uint8_t pinIn1, uint8_t pinIn2, uint8_t ch1, uint8_t ch2);
+  RealMotor(uint8_t pinIn1, uint8_t pinIn2, uint8_t ch1, uint8_t ch2, const char* name);
   void init();
-  void setName(const char* name);
   void setSpeed(int16_t speed);
   void stop();
 

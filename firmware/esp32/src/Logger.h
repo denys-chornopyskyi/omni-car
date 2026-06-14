@@ -3,7 +3,8 @@
 
 #include "ble.h"
 
-#define DEBUGE_MODE
+
+// #define DEBUGE_MODE
 
 enum class LogLevel {
   None,

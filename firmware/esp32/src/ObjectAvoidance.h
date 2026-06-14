@@ -16,10 +16,12 @@ class ObjectAvoidance {
   static void setEnabled(bool v) { _enabled = v; };
 
  private:
-  void updateDirection(uint8_t value, uint8_t threshold, void (SafetyGuard::*setter)(bool), bool (SafetyGuard::*getter)());
+  void updateDirection(uint8_t value, uint8_t threshold, void (SafetyGuard::*setter)(bool), bool (SafetyGuard::*getter)(), uint8_t& lastValue);
   SensorData& data = SensorStore::getInstance().data;
+  uint8_t _lastDistance[4] = {255, 255, 255, 255};
   SafetyGuard& _guard;
   MotionController& _motion;
   static uint8_t _threshold;
   static bool _enabled;
+  bool lastEnabled = false;
 };

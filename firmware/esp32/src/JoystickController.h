@@ -6,33 +6,24 @@
 #include <vector>
 
 #include "MotionController.h"
+#include "BleProtocol.h"
 
 class JoystickController {
  public:
   JoystickController(MotionController& motion);
-  std::string handle(std::string cmd);
-  // enum class JoystickButton {
-  //   Num1 = '1',
-  //   Num2 = '2',
-  //   Num3 = '3',
-  //   Num4 = '4',
-  //   Up = '5',
-  //   Down = '6',
-  //   Left = '7',
-  //   Right = '8',
-  // };
+  commandResult handle(const std::string& cmd);
   enum class JoystickButton {
-    Center = '0',
-    UpLeft = '1',
-    Up = '2',
-    UpRight = '3',
-    Left = '4',
-    Right = '5',
-    DownLeft = '6',
-    Down = '7',
-    DownRight = '8'
-
+    Center = '1',
+    UpLeft = '2',
+    Up = '3',
+    UpRight = '4',
+    Left = '5',
+    Right = '6',
+    DownLeft = '7',
+    Down = '8',
+    DownRight = '9'
   };
+  void reset();
 
  private:
   void keyDown(JoystickButton btn);

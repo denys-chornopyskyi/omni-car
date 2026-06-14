@@ -42,9 +42,14 @@ class MotionController {
   void turningLeft();
   void curvedTrajectoryRight();
   void curvedTrajectoryRight(float cK);
+  void curvedTrajectoryBackwardRight();
   void curvedTrajectoryLeft();
   void curvedTrajectoryLeft(float cK);
+  void curvedTrajectoryBackwardLeft();
+
   void lateralArc();
+
+  void arcLeft(float radius);
 
   void attachGuard(SafetyGuard& guard);
 
@@ -54,6 +59,8 @@ class MotionController {
   float kC = 1.0;
   float kD = 1.0;
   float curveK = 0.3;
+  float wheelBase = 150.0f;
+  float radius = 300.0f;
   IMotor& _motorA;
   IMotor& _motorB;
   IMotor& _motorC;

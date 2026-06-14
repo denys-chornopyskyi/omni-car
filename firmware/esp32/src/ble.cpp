@@ -5,6 +5,9 @@
 
 #include "Logger.h"
 #include "queue.h"
+#include "BleParser.h"
+#include "Arduino.h"
+#include "BlePacketBuilder.h"
 
 #define SERVICE_UUID "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHAR_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
@@ -20,6 +23,8 @@ class ConnectionCallback : public NimBLEServerCallbacks {
   }
   void onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason) {
     isConnected = false;
+    flags.IRStream = false;
+    flags.USStream = false;
     Logger::info("iPhone unconnected!");
     pServer->startAdvertising();
   }
@@ -27,9 +32,20 @@ class ConnectionCallback : public NimBLEServerCallbacks {
 
 class IncomeDataCallback : public NimBLECharacteristicCallbacks {
   void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) override {
-    std::string value = pCharacteristic->getValue();
-    Logger::info(value);
-    queueSend(value.c_str());
+    std::string raw = pCharacteristic->getValue();
+    std::string hex;
+
+    for (uint8_t b : raw) {
+      char buf[4];
+      sprintf(buf, "%02X ", b);
+      hex += buf;
+    }
+
+    Logger::info(hex);
+    BleParser::feed(
+      (const uint8_t*)raw.data(), 
+      raw.length());
+
   }
 };
 
@@ -52,11 +68,26 @@ void bleInit() {
   Logger::info("BLE is running, waiting for iphone...");
 }
 
+StreamFlags flags;
+
 void bleLoop() {
+  delay(10);
+  if (flags.IRStream) {
+    ResponsePacket p = BlePacketBuilder::buildIRPacket();
+    bleSend(p.buf, p.len);
+    // Serial.printf("IR ptr=%p\n", p.buf);
+    // Serial.println("Sent IR");
+  }
+  delay(10);
+  if (flags.USStream) {
+    ResponsePacket p = BlePacketBuilder::buildUSPacket();
+    bleSend(p.buf, p.len);
+    // Serial.printf("US ptr=%p\n", p.buf);
+    // Serial.println("Sent US");
+  }
 }
 
 void bleSend(const char* msg) {
-  // if ((msg != NULL) && (msg[0] == '\0')) return;
   if (!isConnected) return;
 
   pTx->setValue(msg);
@@ -64,8 +95,12 @@ void bleSend(const char* msg) {
 }
 
 void bleSend(std::string msg) {
-   if (msg.empty()) return;
+  if (msg.empty()) return;
   if (!isConnected) return;
   pTx->setValue(msg);
+  pTx->notify();
+}
+void bleSend(const uint8_t* data, size_t len) {
+  pTx->setValue(data, len);
   pTx->notify();
 }

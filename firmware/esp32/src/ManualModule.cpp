@@ -1,10 +1,14 @@
 #include "ManualModule.h"
 #include "Logger.h"
 
-std::string ManualModule::handleCommand(std::string& name, std::string& value) {
-  Logger::info(name);
+commandResult ManualModule::handleCommand(std::string& name, std::string& value) {
+  // Logger::info(name);
   if (name.find('!') != std::string::npos) {
     return joystick.handle(name);
   }
-  return std::string("");
+  if(name == "stop") {
+    joystick.reset();
+    return commandResult::ok();
+  } 
+  return commandResult::err(ErrorType::UnknownCmd);
 }

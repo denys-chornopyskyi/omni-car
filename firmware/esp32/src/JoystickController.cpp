@@ -14,9 +14,12 @@ JoystickController::JoystickController(MotionController& motion) : _motion(&moti
       {{JoystickButton::DownRight}, [this]() { _motion->backwardRight(); }},
       {{JoystickButton::Center, JoystickButton::Right}, [this]() { _motion->turningRight(); }},
       {{JoystickButton::Center, JoystickButton::Left}, [this]() { _motion->turningLeft(); }},
-      {{JoystickButton::Up, JoystickButton::UpLeft}, [this]() { _motion->curvedTrajectoryLeft(); }},
+      {{JoystickButton::UpLeft, JoystickButton::Up}, [this]() { _motion->curvedTrajectoryLeft(); }},
       {{JoystickButton::Up, JoystickButton::UpRight}, [this]() { _motion->curvedTrajectoryRight(); }},
       {{JoystickButton::Center, JoystickButton::Right}, [this]() { _motion->lateralArc(); }},
+      {{JoystickButton::Down, JoystickButton::DownRight}, [this]() { _motion->curvedTrajectoryBackwardRight();}},
+      {{JoystickButton::DownLeft, JoystickButton::Down}, [this]() { _motion->curvedTrajectoryBackwardLeft();}},
+      {{JoystickButton::Up, JoystickButton::Left}, [this]() { _motion->arcLeft(_motion->radius);}}
   };
 
 }
@@ -43,12 +46,17 @@ void JoystickController::keyDown(JoystickButton btn) {
 
 using Button = JoystickController::JoystickButton;
 
-std::string JoystickController::handle(std::string cmd) {
+void JoystickController::reset() {
+  activeKeys.clear();
+  _motion->stopAll();
+}
+
+commandResult JoystickController::handle(const std::string& cmd) {
   JoystickButton btn = static_cast<JoystickButton>(cmd[2]);
 
   bool isPressed = cmd[3] == '1';
 
   isPressed ? keyDown(btn) : keyUp(btn);
 
-  return std::string("");
+  return commandResult::ok();
 }
