@@ -16,7 +16,7 @@ void Protocol::sendIR(uint8_t* values, size_t len) {
     _serial.write(values[i]);
     // Serial.print(values[i]);
   }
-  Serial.println();
+  // Serial.println();
 }
 
 void Protocol::sendDist(msgType type, uint8_t dist) {

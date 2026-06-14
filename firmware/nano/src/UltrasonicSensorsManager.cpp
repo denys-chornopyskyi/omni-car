@@ -2,12 +2,12 @@
 
 #include <Arduino.h>
 
-#include "utils.h"
+#include "Config.h"
 
 UltrasonicSensorsManager::UltrasonicSensorsManager(UltrasonicSensor* sensors,
-                                                   size_t ammount,
+                                                   size_t size,
                                                    Protocol& protocol) : _sensors(sensors),
-                                                                         _size(ammount),
+                                                                         _size(size),
                                                                          _protocol(protocol) {}
 
 void UltrasonicSensorsManager::begin() {
@@ -21,6 +21,7 @@ void UltrasonicSensorsManager::update() {
     // Serial.println(sensorArray[i]->readDistanceCM());
     uint8_t dist = _sensors[i].readDistanceCM();
     _protocol.sendDist(_sensors[i].getType(), dist);
-    _sensors[i].printToSerial(dist);
+    // _sensors[i].printToSerial(dist);
+    delay(30);
   }
 }

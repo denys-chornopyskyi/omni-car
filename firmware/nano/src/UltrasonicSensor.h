@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #include "Counter.h"
-#include "utils.h"
+#include "Config.h"
 
 class UltrasonicSensor {
  public:

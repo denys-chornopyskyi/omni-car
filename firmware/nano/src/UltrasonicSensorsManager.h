@@ -6,7 +6,7 @@
 
 class UltrasonicSensorsManager {
  public:
-  UltrasonicSensorsManager(UltrasonicSensor* sensors, size_t amount, Protocol& protocol);
+  UltrasonicSensorsManager(UltrasonicSensor* sensors, size_t size, Protocol& protocol);
   void begin();
   void update();
 

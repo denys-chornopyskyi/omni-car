@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-#include "utils.h"
+#include "Config.h"
 
 IRsensor::IRsensor(Protocol& protocol)
     : counter(), pcf8574(0x20), _protocol(protocol) {};
@@ -18,10 +18,10 @@ void IRsensor::begin() {
 }
 
 void IRsensor::update() {
-  // counter.printToSerial("IRsensorCount: ", 5000);
+  // counter.printToSerial("IRsensorCount: ", 1000);
   readSensors();
   _protocol.sendIR(_sensorValues, 5);
-    // printToSerial();
+  // printToSerial();
   // counter.increment();
 }
 

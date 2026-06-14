@@ -1,10 +1,18 @@
 import SectionLabel from '@/shared/components/ui/SectionLabel';
-import { useState } from 'react';
+import { useDeviceStore } from '@/shared/store/deviceStore';
+import { useMemo } from 'react';
 import { Text, View } from 'react-native';
 import PositionBar from '../components/PositionBar';
 
 export default function LinePosition() {
-  const [position, setPosition] = useState(0);
+  const ir = useDeviceStore((s) => s.ir);
+
+  const position = useMemo(() => {
+    const sum = ir[0] + ir[1] + ir[2] + ir[3] + ir[4];
+    if (sum === 0) return 0;
+    console.log('hello');
+    return (-2 * ir[0] + -1 * ir[1] + 0 * ir[2] + 1 * ir[3] + 2 * ir[4]) / sum;
+  }, [ir]);
 
   return (
     <View className="mb-[19px]">

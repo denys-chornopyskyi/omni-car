@@ -6,12 +6,14 @@ import { FieldValues, UseFormHandleSubmit } from 'react-hook-form';
 import { View } from 'react-native';
 
 type CalibrationFormProps<T extends FieldValues> = {
+  label: string;
   handleSubmit: UseFormHandleSubmit<T>;
   onSubmit?: (data: T) => void;
   children: React.ReactNode;
 };
 
 export default function CalibrationForm<T extends FieldValues>({
+  label,
   handleSubmit,
   onSubmit,
   children,
@@ -27,8 +29,8 @@ export default function CalibrationForm<T extends FieldValues>({
     setTimeout(() => setSend(false), 500);
   };
   return (
-    <View className="bg-surface px-inlinePadding py-blockPadding h-max w-1/2 rounded-[10px]">
-      <SectionLabel label="motion" />
+    <View className="bg-surface px-inlinePadding py-blockPadding h-max w-[45%] rounded-[10px]">
+      <SectionLabel label={label} />
       <View className="gap-2 mb-[9px]">{children}</View>
       <Button
         label={isSent ? 'Sent!' : 'Send'}

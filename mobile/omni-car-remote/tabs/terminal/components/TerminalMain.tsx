@@ -22,7 +22,7 @@ export default function TerminalMain({ logs, focus }: TerminalMainProps) {
         `bg-[#050011]  border-border px-inlinePadding py-[10px]  border-r border-l`,
         focus ? 'h-[180px]' : 'h-[210px]'
       )}
-      onContentSizeChange={() => listRef.current?.scrollToEnd()}
+      onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
     />
   );
 }

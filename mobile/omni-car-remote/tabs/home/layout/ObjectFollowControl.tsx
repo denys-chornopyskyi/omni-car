@@ -7,7 +7,7 @@ import { View } from 'react-native';
 
 type mode = 'start' | 'stop';
 
-export default function LineFollowControl() {
+export default function ObjectFollowControl() {
   const [active, setActive] = useState<mode>('start');
   const send = useBleStore((s) => s.sendAndReceive);
   const { update } = useOptimisticUpdate();
@@ -18,8 +18,8 @@ export default function LineFollowControl() {
         (newValue) => setActive(newValue),
         v,
         () => {
-          if (v === 'start') return send(PacketBuilder.startLine(), 500);
-          if (v === 'stop') return send(PacketBuilder.endLine(), 500);
+          if (v === 'start') return send(PacketBuilder.startFollowing(), 500);
+          if (v === 'stop') return send(PacketBuilder.stopFollowing(), 500);
         }
       );
     },

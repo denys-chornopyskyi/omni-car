@@ -2,9 +2,11 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Text, View } from 'react-native';
 
 export default function DistanceItem({
+  value,
   side,
   arrowDirection,
 }: {
+  value: number;
   side: 'Front' | 'Left' | 'Right' | 'Back';
   arrowDirection:
     | 'long-arrow-up'
@@ -20,7 +22,8 @@ export default function DistanceItem({
       <View>
         <Text className="text-muted text-[8px] font-medium">{side}</Text>
         <Text className="text-secondary text-[14px] font-mono">
-          25<Text className="text-muted text-[8px] font-medium">cm</Text>
+          {value}
+          <Text className="text-muted text-[8px] font-medium">cm</Text>
         </Text>
       </View>
     </View>

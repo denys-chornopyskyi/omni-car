@@ -3,7 +3,7 @@ import cn from '@/shared/utils/cn';
 import Button from './Button';
 
 export default function ConnectionButton() {
-  const { connect, connected, scanning } = useBleStore();
+  const { connect, connected, scanning, disconnect } = useBleStore();
 
   const labelMap = {
     idle: 'connect',
@@ -17,7 +17,7 @@ export default function ConnectionButton() {
     <Button
       label={labelMap[status]}
       variant="custom"
-      onPress={() => connect()}
+      onPress={() => (connected ? disconnect() : connect())}
       className={cn(
         'px-6 rounded-full',
         connected && 'border-neonGreen',

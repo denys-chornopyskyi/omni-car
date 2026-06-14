@@ -1,5 +1,5 @@
-import { PacketBuilder } from '@/ble/BlePacketBuilder';
-import { ButtonState, MotionButton } from '@/ble/types/motion';
+import { PacketBuilder } from '@/shared/ble/BlePacketBuilder';
+import { ButtonState, MotionButton } from '@/shared/ble/types/motion';
 import { useBleStore } from '@/shared/store/bleStore';
 import { useCallback } from 'react';
 import { View } from 'react-native';
@@ -15,7 +15,7 @@ export default function Dpad() {
   );
 
   return (
-    <View className="flex-col gap-5 items-center py-20">
+    <View className="flex-col gap-5 items-center py-16">
       <View className="flex-row gap-5">
         <DpadButton
           rotation={7}

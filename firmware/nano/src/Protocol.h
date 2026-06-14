@@ -1,6 +1,6 @@
 #pragma once
 #include "SoftwareSerial.h"
-#include "utils.h"
+#include "Config.h"
 
 class Protocol {
  public:

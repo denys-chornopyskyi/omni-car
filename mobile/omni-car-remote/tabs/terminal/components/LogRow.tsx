@@ -4,7 +4,7 @@ import { Text, View } from 'react-native';
 const TYPE_COLOR = {
   info: 'text-primary',
   error: 'text-danger',
-  success: 'text-neon-green',
+  success: 'text-neonGreen',
 };
 
 export default function LogRow({ item }: { item: LogEntry }) {

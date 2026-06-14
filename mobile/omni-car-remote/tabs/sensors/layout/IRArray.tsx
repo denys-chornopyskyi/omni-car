@@ -1,5 +1,6 @@
 import SectionLabel from '@/shared/components/ui/SectionLabel';
-import { useEffect, useState } from 'react';
+import { useDeviceStore } from '@/shared/store/deviceStore';
+import { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 import IRIndicator from '../components/IRIndicator';
@@ -11,7 +12,7 @@ export default function IRAarray() {
   const h4 = useSharedValue(2);
   const h5 = useSharedValue(2);
   const sharedValues = [h1, h2, h3, h4, h5];
-  const [active, setActive] = useState<boolean[]>([true, false, false, false, true]);
+  const active = useDeviceStore((s) => s.ir);
 
   useEffect(() => {
     active.forEach((isActive, index) => {

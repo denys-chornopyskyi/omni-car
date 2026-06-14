@@ -7,7 +7,7 @@ export default function IRIndicator({
   isActive,
 }: {
   sharedValue: SharedValue<number>;
-  isActive: boolean;
+  isActive: number;
 }) {
   const animatedStyle = useAnimatedStyle(() => ({
     height: sharedValue.value,

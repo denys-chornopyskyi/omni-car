@@ -4,22 +4,18 @@ import { useBleStore } from '../store/bleStore';
 import { useDeviceStore } from '../store/deviceStore';
 import TelemetryItem, { TelemetryItemProps } from './ui/TelemetryItem';
 
-const telemetry: TelemetryItemProps[] = [
-  { label: 'Speed', value: '120 km/h' },
-  { label: 'Battery', value: '80%' },
-  { label: 'Temp', value: '32°C' },
-];
-
 const TelemetryPanel = () => {
   const speed = useDeviceStore((s) => s.speed);
   const connected = useBleStore((s) => s.connected);
+  const activeMode = useDeviceStore((s) => s.activeMode);
 
   const telemetry: TelemetryItemProps[] = useMemo(
     () => [
+      { label: 'Mode', value: activeMode },
       { label: 'Speed', value: String(speed) },
       { label: 'Status', value: connected ? 'Ready' : 'Not Ready' },
     ],
-    [speed, connected]
+    [speed, connected, activeMode]
   );
 
   return (

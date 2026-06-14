@@ -1,4 +1,6 @@
-import { Device } from 'react-native-ble-plx';
+import parser, { ParsedPacket } from '@/shared/ble/BleParser';
+import { onConnect } from '@/shared/ble/hook/useBLECommandQueue';
+import { BleManager, Device } from 'react-native-ble-plx';
 import { create } from 'zustand';
 import log from '../utils/log';
 
@@ -6,23 +8,34 @@ const SERVICE_UUID = '6E400001-B5A3-F393-E0A9-E50E24DCCA9E';
 const NOTIFY_UUID = '6E400003-B5A3-F393-E0A9-E50E24DCCA9E';
 const WRITE_UUID = '6E400002-B5A3-F393-E0A9-E50E24DCCA9E';
 
-// const manager = new BleManager();
+const manager = new BleManager();
+
+type PendingRequest = {
+  resolve: (response: ParsedPacket) => void;
+  reject: (response: string) => void;
+  timeout: ReturnType<typeof setTimeout>;
+};
 
 interface BleState {
   device: Device | null;
-  pendingResolve: ((text: string) => void) | null;
+  pendingRequest: PendingRequest | null;
   connected: boolean;
   scanning: boolean;
   connect: () => Promise<void>;
-  sendAndReceive: (msg: string) => Promise<void>;
+  disconnect: () => Promise<void>;
+  sendAndReceive: (msg: string | Uint8Array, timeoutMs: number) => Promise<ParsedPacket>;
   send: (msg: string | Uint8Array) => Promise<void>;
 }
 
 export const useBleStore = create<BleState>((set, get) => ({
   device: null,
-  pendingResolve: null,
+  pendingRequest: null,
   connected: false,
   scanning: false,
+
+  disconnect: async () => {
+    await get().device?.cancelConnection();
+  },
 
   connect: async () => {
     const { connected, scanning } = get();
@@ -90,13 +103,13 @@ export const useBleStore = create<BleState>((set, get) => ({
           }
 
           const bytes = Uint8Array.from(atob(char!.value!), (c) => c.charCodeAt(0));
-          const text = new TextDecoder().decode(bytes);
-          log(`Received: "${text}"`, 'success');
+          parser.feed(bytes);
+          // const text = new TextDecoder().decode(bytes);
+          // log(`Received: "${text}"`, 'success');
 
-          // ← берём актуальный pendingResolve через get()
-          const { pendingResolve } = get();
-          pendingResolve?.(text);
-          set({ pendingResolve: null });
+          // const { pendingResolve } = get();
+          // pendingResolve?.(text);
+          // set({ pendingResolve: null });
         });
 
         device.onDisconnected(() => {
@@ -104,54 +117,49 @@ export const useBleStore = create<BleState>((set, get) => ({
           log('Device disconnected');
         });
 
-        set({ connected: true, device }); // ← один set
+        set({ connected: true, device });
         log('Ready', 'success');
+        onConnect();
       } catch (e: any) {
         log(`Connection error: ${e.message}`, 'error');
       }
     });
   },
 
-  sendAndReceive: async (msg: string) => {
-    const { device } = get();
-    if (!device) return;
+  sendAndReceive: async (
+    msg: string | Uint8Array,
+    timeoutMs: number
+  ): Promise<ParsedPacket> => {
+    return new Promise((resolve, reject) => {
+      log(`send and receive: "${msg}"`);
 
-    log(`Sending: "${msg}"`);
+      if (get().pendingRequest) {
+        log('previous request is pending');
+        clearTimeout(get().pendingRequest?.timeout);
+        set({ pendingRequest: null });
+        reject('Reject: cancelled');
+      }
 
-    try {
-      const response = await Promise.race([
-        new Promise<string>((resolve) => {
-          set({ pendingResolve: resolve });
+      const timeout = setTimeout(() => {
+        set({ pendingRequest: null });
+        reject('Reject: timeout');
+      }, timeoutMs);
 
-          const bytes = new TextEncoder().encode(msg);
-          const base64 = btoa(String.fromCharCode(...bytes));
+      set({
+        pendingRequest: {
+          reject,
+          resolve,
+          timeout,
+        },
+      });
 
-          device
-            .writeCharacteristicWithoutResponseForService(
-              SERVICE_UUID,
-              WRITE_UUID,
-              base64
-            )
-            .then(() => log('Sent'))
-            .catch((e) => log(`Write error: ${e.message}`, 'error'));
-        }),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => {
-            set({ pendingResolve: null });
-            reject(new Error('Timeout 10s'));
-          }, 10000)
-        ),
-      ]);
-
-      log(`Response: "${response}"`);
-    } catch (e: any) {
-      log(`Sending error: ${e.message}`, 'error');
-    }
+      get().send(msg);
+    });
   },
   send: async (msg: string | Uint8Array) => {
     const { device } = get();
-    log('Attemt to send');
-    log(device ? 'true' : 'false');
+    // log('Attemt to send');
+    // log(device ? 'true' : 'false');
     if (!device) return;
 
     const bytes = typeof msg === 'string' ? new TextEncoder().encode(msg) : msg;
